@@ -358,7 +358,9 @@ int HttpClient::responseStatusCode()
                     case eStatusCodeRead:
                         // We're just waiting for the end of the line now
                         break;
-                    };
+                    default:
+                    	return HTTP_ERROR_API;
+                    }
                     // We read something, reset the timeout counter
                     timeoutStart = millis();
                 }

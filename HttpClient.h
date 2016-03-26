@@ -50,6 +50,8 @@ public:
     HttpClient(Client& aClient);
 #endif
 
+    virtual ~HttpClient(){}
+
     /** Start a more complex request.
         Use this when you need to send additional headers in the request,
         but you will also need to call endRequest() when you are finished.
@@ -411,11 +413,11 @@ protected:
 
     // Number of milliseconds that we wait each time there isn't any data
     // available to be read (during status code and header processing)
-    static const int kHttpWaitForDataDelay = 1000;
+    static const int kHttpWaitForDataDelay = 5;
     // Number of milliseconds that we'll wait in total without receiveing any
     // data before returning HTTP_ERROR_TIMED_OUT (during status code and header
     // processing)
-    static const int kHttpResponseTimeout = 30*1000;
+    static const int kHttpResponseTimeout = 5*1000;
     static const char* kContentLengthPrefix;
     typedef enum {
         eIdle,
