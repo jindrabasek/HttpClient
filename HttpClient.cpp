@@ -2,8 +2,16 @@
 // (c) Copyright 2010-2011 MCQN Ltd
 // Released under Apache License, version 2.0
 
-#include "HttpClient.h"
-#include "b64.h"
+#include <Arduino.h>
+#include <b64.h>
+#include <ctype.h>
+#include <HttpClient.h>
+#include <IPAddress.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
 #ifdef PROXY_ENABLED // currently disabled as introduces dependency on Dns.h in Ethernet
 #include <Dns.h>
 #endif
@@ -29,8 +37,7 @@ HttpClient::HttpClient(Client& aClient, const char* aProxy, uint16_t aProxyPort)
 }
 #else
 HttpClient::HttpClient(Client& aClient) :
-        iClient(&aClient),
-        iProxyPort(0) {
+        iClient(&aClient) {
     resetState();
 }
 #endif

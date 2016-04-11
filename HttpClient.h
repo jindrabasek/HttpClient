@@ -5,9 +5,11 @@
 #ifndef HttpClient_h
 #define HttpClient_h
 
-#include <Arduino.h>
+#include <Client.h>
 #include <IPAddress.h>
-#include "Client.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 static const int HTTP_SUCCESS = 0;
 // The end of the headers has been reached.  This consumes the '\n'
@@ -349,7 +351,7 @@ public:
     bool endOfHeadersReached() {
         return (iState == eReadingBody);
     }
-    ;
+
 
     /** Test whether the end of the body has been reached.
      Only works if the Content-Length header was returned by the server
@@ -359,11 +361,11 @@ public:
     virtual bool endOfStream() {
         return endOfBodyReached();
     }
-    ;
+
     virtual bool completed() {
         return endOfBodyReached();
     }
-    ;
+
 
     /** Return the length of the body.
      @return Length of the body, in bytes, or kNoContentLengthHeader if no
@@ -372,7 +374,7 @@ public:
     int contentLength() {
         return iContentLength;
     }
-    ;
+
 
     // Inherited from Print
     // Note: 1st call to these indicates the user is sending the body, so if need
@@ -383,14 +385,14 @@ public:
         };
         return iClient->write(aByte);
     }
-    ;
+
     virtual size_t write(const uint8_t *aBuffer, size_t aSize) {
         if (iState < eRequestSent) {
             finishHeaders();
         };
         return iClient->write(aBuffer, aSize);
     }
-    ;
+
     // Inherited from Stream
     virtual int available();
     /** Read the next byte from the server.
@@ -401,34 +403,33 @@ public:
     virtual int peek() {
         return iClient->peek();
     }
-    ;
+
     virtual void flush() {
         return iClient->flush();
     }
-    ;
 
     // Inherited from Client
     virtual int connect(IPAddress ip, uint16_t port) {
         return iClient->connect(ip, port);
     }
-    ;
+
     virtual int connect(const char *host, uint16_t port) {
         return iClient->connect(host, port);
     }
-    ;
+
     virtual void stop();
     virtual uint8_t connected() {
         return iClient->connected();
     }
-    ;
+
     virtual operator bool() {
         return bool(iClient);
     }
-    ;
+
     virtual uint32_t httpResponseTimeout() {
         return iHttpResponseTimeout;
     }
-    ;
+
     virtual void setHttpResponseTimeout(uint32_t timeout) {
         iHttpResponseTimeout = timeout;
     }
@@ -493,9 +494,12 @@ protected:
     int iBodyLengthConsumed;
     // How far through a Content-Length header prefix we are
     const char* iContentLengthPtr;
+
+#ifdef PROXY_ENABLED
     // Address of the proxy to use, if we're using one
     IPAddress iProxyAddress;
     uint16_t iProxyPort;
+#endif
     uint32_t iHttpResponseTimeout;
     int lastAvailable;bool commTimedOut;
 };
