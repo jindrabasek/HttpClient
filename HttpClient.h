@@ -9,19 +9,19 @@
 #include <IPAddress.h>
 #include "Client.h"
 
-static const int HTTP_SUCCESS =0;
+static const int HTTP_SUCCESS = 0;
 // The end of the headers has been reached.  This consumes the '\n'
 // Could not connect to the server
-static const int HTTP_ERROR_CONNECTION_FAILED =-1;
+static const int HTTP_ERROR_CONNECTION_FAILED = -1;
 // This call was made when the HttpClient class wasn't expecting it
 // to be called.  Usually indicates your code is using the class
 // incorrectly
-static const int HTTP_ERROR_API =-2;
+static const int HTTP_ERROR_API = -2;
 // Spent too long waiting for a reply
-static const int HTTP_ERROR_TIMED_OUT =-3;
+static const int HTTP_ERROR_TIMED_OUT = -3;
 // The response from the server is invalid, is it definitely an HTTP
 // server?
-static const int HTTP_ERROR_INVALID_RESPONSE =-4;
+static const int HTTP_ERROR_INVALID_RESPONSE = -4;
 
 // Define some of the common methods and headers here
 // That lets other code reuse them without having to declare another copy
@@ -34,11 +34,10 @@ static const int HTTP_ERROR_INVALID_RESPONSE =-4;
 #define HTTP_HEADER_CONNECTION     "Connection"
 #define HTTP_HEADER_USER_AGENT     "User-Agent"
 
-class HttpClient : public Client
-{
+class HttpClient : public Client {
 public:
-    static const int kNoContentLengthHeader =-1;
-    static const int kHttpPort =80;
+    static const int kNoContentLengthHeader = -1;
+    static const int kHttpPort = 80;
     static const char* kUserAgent;
 
 // FIXME Write longer API request, using port and user-agent, example
@@ -50,374 +49,426 @@ public:
     HttpClient(Client& aClient);
 #endif
 
-    virtual ~HttpClient(){}
+    virtual ~HttpClient() {
+    }
 
     /** Start a more complex request.
-        Use this when you need to send additional headers in the request,
-        but you will also need to call endRequest() when you are finished.
-    */
+     Use this when you need to send additional headers in the request,
+     but you will also need to call endRequest() when you are finished.
+     */
     void beginRequest();
 
     /** End a more complex request.
-        Use this when you need to have sent additional headers in the request,
-        but you will also need to call beginRequest() at the start.
-    */
+     Use this when you need to have sent additional headers in the request,
+     but you will also need to call beginRequest() at the start.
+     */
     void endRequest();
 
     /** Connect to the server and start to send a GET request.
-      @param aServerName  Name of the server being connected to.  If NULL, the
-                          "Host" header line won't be sent
-      @param aServerPort  Port to connect to on the server
-      @param aURLPath     Url to request
-      @param aUserAgent   User-Agent string to send.  If NULL the default
-                          user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int get(const char* aServerName, uint16_t aServerPort, const char* aURLPath, 
-            const char* aUserAgent =NULL)
-      { return startRequest(aServerName, aServerPort, aURLPath, HTTP_METHOD_GET, aUserAgent); }
+     @param aServerName  Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aServerPort  Port to connect to on the server
+     @param aURLPath     Url to request
+     @param aUserAgent   User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int get(const char* aServerName, uint16_t aServerPort, const char* aURLPath,
+            const char* aUserAgent = NULL) {
+        return startRequest(aServerName, aServerPort, aURLPath, HTTP_METHOD_GET,
+                aUserAgent);
+    }
 
     /** Connect to the server and start to send a GET request.
-      @param aServerName  Name of the server being connected to.  If NULL, the
-                          "Host" header line won't be sent
-      @param aURLPath     Url to request
-      @param aUserAgent   User-Agent string to send.  If NULL the default
-                          user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int get(const char* aServerName, const char* aURLPath, const char* aUserAgent =NULL)
-      { return startRequest(aServerName, kHttpPort, aURLPath, HTTP_METHOD_GET, aUserAgent); }
+     @param aServerName  Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aURLPath     Url to request
+     @param aUserAgent   User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int get(const char* aServerName, const char* aURLPath,
+            const char* aUserAgent = NULL) {
+        return startRequest(aServerName, kHttpPort, aURLPath, HTTP_METHOD_GET,
+                aUserAgent);
+    }
 
     /** Connect to the server and start to send a GET request.  This version connects
-      doesn't perform a DNS lookup and just connects to the given IP address.
-      @param aServerAddress IP address of the server to connect to
-      @param aServerName    Name of the server being connected to.  If NULL, the
-                            "Host" header line won't be sent
-      @param aServerPort    Port to connect to on the server
-      @param aURLPath       Url to request
-      @param aUserAgent     User-Agent string to send.  If NULL the default
-                            user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int get(const IPAddress& aServerAddress,
-            const char* aServerName, 
-            uint16_t aServerPort,
-            const char* aURLPath, 
-            const char* aUserAgent =NULL)
-      { return startRequest(aServerAddress, aServerName, aServerPort, aURLPath, HTTP_METHOD_GET, aUserAgent); }
+     doesn't perform a DNS lookup and just connects to the given IP address.
+     @param aServerAddress IP address of the server to connect to
+     @param aServerName    Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aServerPort    Port to connect to on the server
+     @param aURLPath       Url to request
+     @param aUserAgent     User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int get(const IPAddress& aServerAddress, const char* aServerName,
+            uint16_t aServerPort, const char* aURLPath, const char* aUserAgent =
+                    NULL) {
+        return startRequest(aServerAddress, aServerName, aServerPort, aURLPath,
+                HTTP_METHOD_GET, aUserAgent);
+    }
 
     /** Connect to the server and start to send a GET request.  This version connects
-      doesn't perform a DNS lookup and just connects to the given IP address.
-      @param aServerAddress IP address of the server to connect to
-      @param aServerName    Name of the server being connected to.  If NULL, the
-                            "Host" header line won't be sent
-      @param aURLPath       Url to request
-      @param aUserAgent     User-Agent string to send.  If NULL the default
-                            user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int get(const IPAddress& aServerAddress,
-            const char* aServerName, 
-            const char* aURLPath, 
-            const char* aUserAgent =NULL)
-      { return startRequest(aServerAddress, aServerName, kHttpPort, aURLPath, HTTP_METHOD_GET, aUserAgent); }
+     doesn't perform a DNS lookup and just connects to the given IP address.
+     @param aServerAddress IP address of the server to connect to
+     @param aServerName    Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aURLPath       Url to request
+     @param aUserAgent     User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int get(const IPAddress& aServerAddress, const char* aServerName,
+            const char* aURLPath, const char* aUserAgent = NULL) {
+        return startRequest(aServerAddress, aServerName, kHttpPort, aURLPath,
+                HTTP_METHOD_GET, aUserAgent);
+    }
 
     /** Connect to the server and start to send a POST request.
-      @param aServerName  Name of the server being connected to.  If NULL, the
-                          "Host" header line won't be sent
-      @param aServerPort  Port to connect to on the server
-      @param aURLPath     Url to request
-      @param aUserAgent   User-Agent string to send.  If NULL the default
-                          user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int post(const char* aServerName, 
-             uint16_t aServerPort,
-             const char* aURLPath, 
-             const char* aUserAgent =NULL)
-      { return startRequest(aServerName, aServerPort, aURLPath, HTTP_METHOD_POST, aUserAgent); }
+     @param aServerName  Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aServerPort  Port to connect to on the server
+     @param aURLPath     Url to request
+     @param aUserAgent   User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int post(const char* aServerName, uint16_t aServerPort,
+             const char* aURLPath, const char* aUserAgent = NULL) {
+        return startRequest(aServerName, aServerPort, aURLPath,
+                HTTP_METHOD_POST, aUserAgent);
+    }
 
     /** Connect to the server and start to send a POST request.
-      @param aServerName  Name of the server being connected to.  If NULL, the
-                          "Host" header line won't be sent
-      @param aURLPath     Url to request
-      @param aUserAgent   User-Agent string to send.  If NULL the default
-                          user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int post(const char* aServerName, 
-             const char* aURLPath, 
-             const char* aUserAgent =NULL)
-      { return startRequest(aServerName, kHttpPort, aURLPath, HTTP_METHOD_POST, aUserAgent); }
+     @param aServerName  Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aURLPath     Url to request
+     @param aUserAgent   User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int post(const char* aServerName, const char* aURLPath,
+             const char* aUserAgent = NULL) {
+        return startRequest(aServerName, kHttpPort, aURLPath, HTTP_METHOD_POST,
+                aUserAgent);
+    }
 
     /** Connect to the server and start to send a POST request.  This version connects
-      doesn't perform a DNS lookup and just connects to the given IP address.
-      @param aServerAddress IP address of the server to connect to
-      @param aServerName  Name of the server being connected to.  If NULL, the
-                          "Host" header line won't be sent
-      @param aServerPort  Port to connect to on the server
-      @param aURLPath     Url to request
-      @param aUserAgent   User-Agent string to send.  If NULL the default
-                          user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int post(const IPAddress& aServerAddress,
-             const char* aServerName, 
-             uint16_t aServerPort,
-             const char* aURLPath, 
-             const char* aUserAgent =NULL)
-      { return startRequest(aServerAddress, aServerName, aServerPort, aURLPath, HTTP_METHOD_POST, aUserAgent); }
+     doesn't perform a DNS lookup and just connects to the given IP address.
+     @param aServerAddress IP address of the server to connect to
+     @param aServerName  Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aServerPort  Port to connect to on the server
+     @param aURLPath     Url to request
+     @param aUserAgent   User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int post(const IPAddress& aServerAddress, const char* aServerName,
+             uint16_t aServerPort, const char* aURLPath,
+             const char* aUserAgent = NULL) {
+        return startRequest(aServerAddress, aServerName, aServerPort, aURLPath,
+                HTTP_METHOD_POST, aUserAgent);
+    }
 
     /** Connect to the server and start to send a POST request.  This version connects
-      doesn't perform a DNS lookup and just connects to the given IP address.
-      @param aServerAddress IP address of the server to connect to
-      @param aServerName  Name of the server being connected to.  If NULL, the
-                          "Host" header line won't be sent
-      @param aURLPath     Url to request
-      @param aUserAgent   User-Agent string to send.  If NULL the default
-                          user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int post(const IPAddress& aServerAddress,
-             const char* aServerName, 
-             const char* aURLPath, 
-             const char* aUserAgent =NULL)
-      { return startRequest(aServerAddress, aServerName, kHttpPort, aURLPath, HTTP_METHOD_POST, aUserAgent); }
+     doesn't perform a DNS lookup and just connects to the given IP address.
+     @param aServerAddress IP address of the server to connect to
+     @param aServerName  Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aURLPath     Url to request
+     @param aUserAgent   User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int post(const IPAddress& aServerAddress, const char* aServerName,
+             const char* aURLPath, const char* aUserAgent = NULL) {
+        return startRequest(aServerAddress, aServerName, kHttpPort, aURLPath,
+                HTTP_METHOD_POST, aUserAgent);
+    }
 
     /** Connect to the server and start to send a PUT request.
-      @param aServerName  Name of the server being connected to.  If NULL, the
-                          "Host" header line won't be sent
-      @param aServerPort  Port to connect to on the server
-      @param aURLPath     Url to request
-      @param aUserAgent   User-Agent string to send.  If NULL the default
-                          user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int put(const char* aServerName, 
-            uint16_t aServerPort,
-            const char* aURLPath, 
-            const char* aUserAgent =NULL)
-      { return startRequest(aServerName, aServerPort, aURLPath, HTTP_METHOD_PUT, aUserAgent); }
+     @param aServerName  Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aServerPort  Port to connect to on the server
+     @param aURLPath     Url to request
+     @param aUserAgent   User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int put(const char* aServerName, uint16_t aServerPort, const char* aURLPath,
+            const char* aUserAgent = NULL) {
+        return startRequest(aServerName, aServerPort, aURLPath, HTTP_METHOD_PUT,
+                aUserAgent);
+    }
 
     /** Connect to the server and start to send a PUT request.
-      @param aServerName  Name of the server being connected to.  If NULL, the
-                          "Host" header line won't be sent
-      @param aURLPath     Url to request
-      @param aUserAgent   User-Agent string to send.  If NULL the default
-                          user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int put(const char* aServerName, 
-            const char* aURLPath, 
-            const char* aUserAgent =NULL)
-      { return startRequest(aServerName, kHttpPort, aURLPath, HTTP_METHOD_PUT, aUserAgent); }
+     @param aServerName  Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aURLPath     Url to request
+     @param aUserAgent   User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int put(const char* aServerName, const char* aURLPath,
+            const char* aUserAgent = NULL) {
+        return startRequest(aServerName, kHttpPort, aURLPath, HTTP_METHOD_PUT,
+                aUserAgent);
+    }
 
     /** Connect to the server and start to send a PUT request.  This version connects
-      doesn't perform a DNS lookup and just connects to the given IP address.
-      @param aServerAddress IP address of the server to connect to
-      @param aServerName  Name of the server being connected to.  If NULL, the
-                          "Host" header line won't be sent
-      @param aServerPort  Port to connect to on the server
-      @param aURLPath     Url to request
-      @param aUserAgent   User-Agent string to send.  If NULL the default
-                          user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int put(const IPAddress& aServerAddress,
-            const char* aServerName, 
-            uint16_t aServerPort,
-            const char* aURLPath, 
-            const char* aUserAgent =NULL)
-      { return startRequest(aServerAddress, aServerName, aServerPort, aURLPath, HTTP_METHOD_PUT, aUserAgent); }
+     doesn't perform a DNS lookup and just connects to the given IP address.
+     @param aServerAddress IP address of the server to connect to
+     @param aServerName  Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aServerPort  Port to connect to on the server
+     @param aURLPath     Url to request
+     @param aUserAgent   User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int put(const IPAddress& aServerAddress, const char* aServerName,
+            uint16_t aServerPort, const char* aURLPath, const char* aUserAgent =
+                    NULL) {
+        return startRequest(aServerAddress, aServerName, aServerPort, aURLPath,
+                HTTP_METHOD_PUT, aUserAgent);
+    }
 
     /** Connect to the server and start to send a PUT request.  This version connects
-      doesn't perform a DNS lookup and just connects to the given IP address.
-      @param aServerAddress IP address of the server to connect to
-      @param aServerName  Name of the server being connected to.  If NULL, the
-                          "Host" header line won't be sent
-      @param aURLPath     Url to request
-      @param aUserAgent   User-Agent string to send.  If NULL the default
-                          user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int put(const IPAddress& aServerAddress,
-            const char* aServerName, 
-            const char* aURLPath, 
-            const char* aUserAgent =NULL)
-      { return startRequest(aServerAddress, aServerName, kHttpPort, aURLPath, HTTP_METHOD_PUT, aUserAgent); }
+     doesn't perform a DNS lookup and just connects to the given IP address.
+     @param aServerAddress IP address of the server to connect to
+     @param aServerName  Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aURLPath     Url to request
+     @param aUserAgent   User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int put(const IPAddress& aServerAddress, const char* aServerName,
+            const char* aURLPath, const char* aUserAgent = NULL) {
+        return startRequest(aServerAddress, aServerName, kHttpPort, aURLPath,
+                HTTP_METHOD_PUT, aUserAgent);
+    }
 
     /** Connect to the server and start to send the request.
-      @param aServerName  Name of the server being connected to.
-      @param aServerPort  Port to connect to on the server
-      @param aURLPath     Url to request
-      @param aHttpMethod  Type of HTTP request to make, e.g. "GET", "POST", etc.
-      @param aUserAgent   User-Agent string to send.  If NULL the default
-                          user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int startRequest(const char* aServerName,
-                     uint16_t    aServerPort,
-                     const char* aURLPath,
-                     const char* aHttpMethod,
+     @param aServerName  Name of the server being connected to.
+     @param aServerPort  Port to connect to on the server
+     @param aURLPath     Url to request
+     @param aHttpMethod  Type of HTTP request to make, e.g. "GET", "POST", etc.
+     @param aUserAgent   User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int startRequest(const char* aServerName, uint16_t aServerPort,
+                     const char* aURLPath, const char* aHttpMethod,
                      const char* aUserAgent);
 
     /** Connect to the server and start to send the request.
-      @param aServerAddress IP address of the server to connect to.
-      @param aServerName Name of the server being connected to.  If NULL, the
-                         "Host" header line won't be sent
-      @param aServerPort  Port to connect to on the server
-      @param aURLPath	Url to request
-      @param aHttpMethod  Type of HTTP request to make, e.g. "GET", "POST", etc.
-      @param aUserAgent User-Agent string to send.  If NULL the default
-                        user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int startRequest(const IPAddress& aServerAddress,
-                     const char* aServerName,
-                     uint16_t    aServerPort,
-                     const char* aURLPath,
-                     const char* aHttpMethod,
-                     const char* aUserAgent);
+     @param aServerAddress IP address of the server to connect to.
+     @param aServerName Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aServerPort  Port to connect to on the server
+     @param aURLPath	Url to request
+     @param aHttpMethod  Type of HTTP request to make, e.g. "GET", "POST", etc.
+     @param aUserAgent User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int startRequest(const IPAddress& aServerAddress, const char* aServerName,
+                     uint16_t aServerPort, const char* aURLPath,
+                     const char* aHttpMethod, const char* aUserAgent);
 
     /** Send an additional header line.  This can only be called in between the
-      calls to startRequest and finishRequest.
-      @param aHeader Header line to send, in its entirety (but without the
-                     trailing CRLF.  E.g. "Authorization: Basic YQDDCAIGES" 
-    */
+     calls to startRequest and finishRequest.
+     @param aHeader Header line to send, in its entirety (but without the
+     trailing CRLF.  E.g. "Authorization: Basic YQDDCAIGES"
+     */
     void sendHeader(const char* aHeader);
 
     /** Send an additional header line.  This is an alternate form of
-      sendHeader() which takes the header name and content as separate strings.
-      The call will add the ": " to separate the header, so for example, to
-      send a XXXXXX header call sendHeader("XXXXX", "Something")
-      @param aHeaderName Type of header being sent
-      @param aHeaderValue Value for that header
-    */
+     sendHeader() which takes the header name and content as separate strings.
+     The call will add the ": " to separate the header, so for example, to
+     send a XXXXXX header call sendHeader("XXXXX", "Something")
+     @param aHeaderName Type of header being sent
+     @param aHeaderValue Value for that header
+     */
     void sendHeader(const char* aHeaderName, const char* aHeaderValue);
 
     /** Send an additional header line.  This is an alternate form of
-      sendHeader() which takes the header name and content separately but where
-      the value is provided as an integer.
-      The call will add the ": " to separate the header, so for example, to
-      send a XXXXXX header call sendHeader("XXXXX", 123)
-      @param aHeaderName Type of header being sent
-      @param aHeaderValue Value for that header
-    */
+     sendHeader() which takes the header name and content separately but where
+     the value is provided as an integer.
+     The call will add the ": " to separate the header, so for example, to
+     send a XXXXXX header call sendHeader("XXXXX", 123)
+     @param aHeaderName Type of header being sent
+     @param aHeaderValue Value for that header
+     */
     void sendHeader(const char* aHeaderName, const int aHeaderValue);
 
     /** Send a basic authentication header.  This will encode the given username
-      and password, and send them in suitable header line for doing Basic
-      Authentication.
-      @param aUser Username for the authorization
-      @param aPassword Password for the user aUser
-    */
+     and password, and send them in suitable header line for doing Basic
+     Authentication.
+     @param aUser Username for the authorization
+     @param aPassword Password for the user aUser
+     */
     void sendBasicAuth(const char* aUser, const char* aPassword);
 
     /** Finish sending the HTTP request.  This basically just sends the blank
-      line to signify the end of the request
-    */
+     line to signify the end of the request
+     */
     void finishRequest();
 
     /** Get the HTTP status code contained in the response.
-      For example, 200 for successful request, 404 for file not found, etc.
-    */
+     For example, 200 for successful request, 404 for file not found, etc.
+     */
     int responseStatusCode();
 
     /** Read the next character of the response headers.
-      This functions in the same way as read() but to be used when reading
-      through the headers.  Check whether or not the end of the headers has
-      been reached by calling endOfHeadersReached(), although after that point
-      this will still return data as read() would, but slightly less efficiently
-      @return The next character of the response headers
-    */
+     This functions in the same way as read() but to be used when reading
+     through the headers.  Check whether or not the end of the headers has
+     been reached by calling endOfHeadersReached(), although after that point
+     this will still return data as read() would, but slightly less efficiently
+     @return The next character of the response headers
+     */
     int readHeader();
 
     /** Skip any response headers to get to the body.
-      Use this if you don't want to do any special processing of the headers
-      returned in the response.  You can also use it after you've found all of
-      the headers you're interested in, and just want to get on with processing
-      the body.
-      @return HTTP_SUCCESS if successful, else an error code
-    */
+     Use this if you don't want to do any special processing of the headers
+     returned in the response.  You can also use it after you've found all of
+     the headers you're interested in, and just want to get on with processing
+     the body.
+     @return HTTP_SUCCESS if successful, else an error code
+     */
     int skipResponseHeaders();
 
     /** Test whether all of the response headers have been consumed.
-      @return true if we are now processing the response body, else false
-    */
-    bool endOfHeadersReached() { return (iState == eReadingBody); };
+     @return true if we are now processing the response body, else false
+     */
+    bool endOfHeadersReached() {
+        return (iState == eReadingBody);
+    }
+    ;
 
     /** Test whether the end of the body has been reached.
-      Only works if the Content-Length header was returned by the server
-      @return true if we are now at the end of the body, else false
-    */
+     Only works if the Content-Length header was returned by the server
+     @return true if we are now at the end of the body, else false
+     */
     bool endOfBodyReached();
-    virtual bool endOfStream() { return endOfBodyReached(); };
-    virtual bool completed() { return endOfBodyReached(); };
+    virtual bool endOfStream() {
+        return endOfBodyReached();
+    }
+    ;
+    virtual bool completed() {
+        return endOfBodyReached();
+    }
+    ;
 
     /** Return the length of the body.
-      @return Length of the body, in bytes, or kNoContentLengthHeader if no
-      Content-Length header was returned by the server
-    */
-    int contentLength() { return iContentLength; };
+     @return Length of the body, in bytes, or kNoContentLengthHeader if no
+     Content-Length header was returned by the server
+     */
+    int contentLength() {
+        return iContentLength;
+    }
+    ;
 
     // Inherited from Print
     // Note: 1st call to these indicates the user is sending the body, so if need
     // Note: be we should finish the header first
-    virtual size_t write(uint8_t aByte) { if (iState < eRequestSent) { finishHeaders(); }; return iClient-> write(aByte); };
-    virtual size_t write(const uint8_t *aBuffer, size_t aSize) { if (iState < eRequestSent) { finishHeaders(); }; return iClient->write(aBuffer, aSize); };
+    virtual size_t write(uint8_t aByte) {
+        if (iState < eRequestSent) {
+            finishHeaders();
+        };
+        return iClient->write(aByte);
+    }
+    ;
+    virtual size_t write(const uint8_t *aBuffer, size_t aSize) {
+        if (iState < eRequestSent) {
+            finishHeaders();
+        };
+        return iClient->write(aBuffer, aSize);
+    }
+    ;
     // Inherited from Stream
-    virtual int available() { return iClient->available(); };
+    virtual int available();
     /** Read the next byte from the server.
-      @return Byte read or -1 if there are no bytes available.
-    */
+     @return Byte read or -1 if there are no bytes available.
+     */
     virtual int read();
     virtual int read(uint8_t *buf, size_t size);
-    virtual int peek() { return iClient->peek(); };
-    virtual void flush() { return iClient->flush(); };
+    virtual int peek() {
+        return iClient->peek();
+    }
+    ;
+    virtual void flush() {
+        return iClient->flush();
+    }
+    ;
 
     // Inherited from Client
-    virtual int connect(IPAddress ip, uint16_t port) { return iClient->connect(ip, port); };
-    virtual int connect(const char *host, uint16_t port) { return iClient->connect(host, port); };
+    virtual int connect(IPAddress ip, uint16_t port) {
+        return iClient->connect(ip, port);
+    }
+    ;
+    virtual int connect(const char *host, uint16_t port) {
+        return iClient->connect(host, port);
+    }
+    ;
     virtual void stop();
-    virtual uint8_t connected() { return iClient->connected(); };
-    virtual operator bool() { return bool(iClient); };
-    virtual uint32_t httpResponseTimeout() { return iHttpResponseTimeout; };
-    virtual void setHttpResponseTimeout(uint32_t timeout) { iHttpResponseTimeout = timeout; };
+    virtual uint8_t connected() {
+        return iClient->connected();
+    }
+    ;
+    virtual operator bool() {
+        return bool(iClient);
+    }
+    ;
+    virtual uint32_t httpResponseTimeout() {
+        return iHttpResponseTimeout;
+    }
+    ;
+    virtual void setHttpResponseTimeout(uint32_t timeout) {
+        iHttpResponseTimeout = timeout;
+    }
+
+    bool isCommTimedOut() const {
+        return commTimedOut;
+    }
+
 protected:
     /** Reset internal state data back to the "just initialised" state
-    */
+     */
     void resetState();
 
     /** Send the first part of the request and the initial headers.
-      @param aServerName Name of the server being connected to.  If NULL, the
-                         "Host" header line won't be sent
-      @param aServerIP  IP address of the server (only used if we're going through a
-                        proxy and aServerName is NULL
-      @param aServerPort  Port of the server being connected to.
-      @param aURLPath	Url to request
-      @param aHttpMethod  Type of HTTP request to make, e.g. "GET", "POST", etc.
-      @param aUserAgent User-Agent string to send.  If NULL the default
-                        user-agent kUserAgent will be sent
-      @return 0 if successful, else error
-    */
-    int sendInitialHeaders(const char* aServerName,
-                     IPAddress   aServerIP,
-                     uint16_t    aPort,
-                     const char* aURLPath,
-                     const char* aHttpMethod,
-                     const char* aUserAgent);
+     @param aServerName Name of the server being connected to.  If NULL, the
+     "Host" header line won't be sent
+     @param aServerIP  IP address of the server (only used if we're going through a
+     proxy and aServerName is NULL
+     @param aServerPort  Port of the server being connected to.
+     @param aURLPath	Url to request
+     @param aHttpMethod  Type of HTTP request to make, e.g. "GET", "POST", etc.
+     @param aUserAgent User-Agent string to send.  If NULL the default
+     user-agent kUserAgent will be sent
+     @return 0 if successful, else error
+     */
+    int sendInitialHeaders(const char* aServerName, IPAddress aServerIP,
+                           uint16_t aPort, const char* aURLPath,
+                           const char* aHttpMethod, const char* aUserAgent);
 
     /* Let the server know that we've reached the end of the headers
-    */
+     */
     void finishHeaders();
 
     // Number of milliseconds that we wait each time there isn't any data
     // available to be read (during status code and header processing)
-    static const int kHttpWaitForDataDelay = 5;
+    static const int kHttpWaitForDataDelay = 3;
     // Number of milliseconds that we'll wait in total without receiveing any
     // data before returning HTTP_ERROR_TIMED_OUT (during status code and header
     // processing)
-    static const int kHttpResponseTimeout = 5*1000;
+    static const int kHttpResponseTimeout = 5 * 200;
     static const char* kContentLengthPrefix;
     typedef enum {
         eIdle,
@@ -446,6 +497,7 @@ protected:
     IPAddress iProxyAddress;
     uint16_t iProxyPort;
     uint32_t iHttpResponseTimeout;
+    int lastAvailable;bool commTimedOut;
 };
 
 #endif
