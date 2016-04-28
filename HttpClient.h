@@ -434,9 +434,7 @@ public:
         iHttpResponseTimeout = timeout;
     }
 
-    bool isCommTimedOut() const {
-        return commTimedOut;
-    }
+    void receiveAndPrintResponse(int requestErrResult);
 
 protected:
     /** Reset internal state data back to the "just initialised" state
@@ -501,7 +499,6 @@ protected:
     uint16_t iProxyPort;
 #endif
     uint32_t iHttpResponseTimeout;
-    int lastAvailable;bool commTimedOut;
 };
 
 #endif

@@ -49,8 +49,6 @@ void HttpClient::resetState() {
     iBodyLengthConsumed = 0;
     iContentLengthPtr = kContentLengthPrefix;
     iHttpResponseTimeout = kHttpResponseTimeout;
-    lastAvailable = 0;
-    commTimedOut = false;
 }
 
 void HttpClient::stop() {
@@ -261,6 +259,36 @@ void HttpClient::sendBasicAuth(const char* aUser, const char* aPassword) {
     }
     // And end the header we've sent
     iClient->println();
+}
+
+void HttpClient::receiveAndPrintResponse(int requestErrResult) {
+    if (requestErrResult == 0) {
+        requestErrResult = responseStatusCode();
+        if (requestErrResult >= 0) {
+            // Usually you'd check that the response code is 200 or a
+            // similar "success" code (200-299) before carrying on,
+            // but we'll print out whatever response we get
+            requestErrResult = skipResponseHeaders();
+            if (requestErrResult >= 0) {
+                // Whilst we haven't timed out & haven't reached the end of the body
+                while (available()) {
+                    char c = read();
+                    // Print out this character
+                    Serial.print(c);
+                }
+                Serial.println(F("HTTP done!\n"));
+            } else {
+                Serial.print(F("Failed to skip response headers: "));
+                Serial.println(requestErrResult);
+            }
+        } else {
+            Serial.print(F("Getting response failed: "));
+            Serial.println(requestErrResult);
+        }
+    } else {
+        Serial.print(F("Connect failed: "));
+        Serial.println(requestErrResult);
+    }
 }
 
 void HttpClient::finishHeaders() {
@@ -486,12 +514,10 @@ int HttpClient::available() {
     while ((millis() - timeoutStart) < iHttpResponseTimeout) {
         int available = iClient->available();
         if (available) {
-            lastAvailable = available;
-            commTimedOut = false;
             return available;
         } else {
             // we probably read all data that was received from net
-            if (lastAvailable == 1) {
+            if (completed()) {
                 return available;
             }
             // We haven't got any data, so let's pause to allow some to
@@ -499,8 +525,6 @@ int HttpClient::available() {
             delay(kHttpWaitForDataDelay);
         }
     }
-
-    commTimedOut = true;
 
     return false;
 }
