@@ -74,7 +74,7 @@ int HttpClient::startRequest(const char* aServerName, uint16_t aServerPort,
         if (!iClient->connect(iProxyAddress, iProxyPort) > 0)
         {
 #ifdef LOGGING
-            Serial.println("Proxy connection failed");
+            Serial.println(F("Proxy connection failed"));
 #endif
             return HTTP_ERROR_CONNECTION_FAILED;
         }
@@ -84,7 +84,7 @@ int HttpClient::startRequest(const char* aServerName, uint16_t aServerPort,
     {
         if (!iClient->connect(aServerName, aServerPort) > 0) {
 #ifdef LOGGING
-            Serial.println("Connection failed");
+            Serial.println(F("Connection failed"));
 #endif
             return HTTP_ERROR_CONNECTION_FAILED;
         }
@@ -117,7 +117,7 @@ int HttpClient::startRequest(const IPAddress& aServerAddress,
         if (!iClient->connect(iProxyAddress, iProxyPort) > 0)
         {
 #ifdef LOGGING
-            Serial.println("Proxy connection failed");
+            Serial.println(F("Proxy connection failed"));
 #endif
             return HTTP_ERROR_CONNECTION_FAILED;
         }
@@ -127,7 +127,7 @@ int HttpClient::startRequest(const IPAddress& aServerAddress,
     {
         if (!iClient->connect(aServerAddress, aServerPort) > 0) {
 #ifdef LOGGING
-            Serial.println("Connection failed");
+            Serial.println(F("Connection failed"));
 #endif
             return HTTP_ERROR_CONNECTION_FAILED;
         }
@@ -150,7 +150,7 @@ int HttpClient::sendInitialHeaders(const char* aServerName, IPAddress aServerIP,
                                    const char* aHttpMethod,
                                    const char* aUserAgent) {
 #ifdef LOGGING
-    Serial.println("Connected");
+    Serial.println(F("Connected"));
 #endif
     // Send the HTTP command, i.e. "GET /somepath/ HTTP/1.0"
     iClient->print(aHttpMethod);
@@ -159,7 +159,7 @@ int HttpClient::sendInitialHeaders(const char* aServerName, IPAddress aServerIP,
     if (iProxyPort)
     {
         // We're going through a proxy, send a full URL
-        iClient->print("http://");
+        iClient->print(F("http://"));
         if (aServerName)
         {
             // We've got a server name, so use it
@@ -172,19 +172,19 @@ int HttpClient::sendInitialHeaders(const char* aServerName, IPAddress aServerIP,
         }
         if (aPort != kHttpPort)
         {
-            iClient->print(":");
+            iClient->print(':');
             iClient->print(aPort);
         }
     }
 #endif
     iClient->print(aURLPath);
-    iClient->println(" HTTP/1.1");
+    iClient->println(F(" HTTP/1.1"));
     // The host header, if required
     if (aServerName) {
-        iClient->print("Host: ");
+        iClient->print(F("Host: "));
         iClient->print(aServerName);
         if (aPort != kHttpPort) {
-            iClient->print(":");
+            iClient->print(':');
             iClient->print(aPort);
         }
         iClient->println();
@@ -210,19 +210,19 @@ void HttpClient::sendHeader(const char* aHeader) {
 
 void HttpClient::sendHeader(const char* aHeaderName, const char* aHeaderValue) {
     iClient->print(aHeaderName);
-    iClient->print(": ");
+    iClient->print(F(": "));
     iClient->println(aHeaderValue);
 }
 
 void HttpClient::sendHeader(const char* aHeaderName, const int aHeaderValue) {
     iClient->print(aHeaderName);
-    iClient->print(": ");
+    iClient->print(F(": "));
     iClient->println(aHeaderValue);
 }
 
 void HttpClient::sendBasicAuth(const char* aUser, const char* aPassword) {
     // Send the initial part of this header line
-    iClient->print("Authorization: Basic ");
+    iClient->print(F("Authorization: Basic "));
     // Now Base64 encode "aUser:aPassword" and send that
     // This seems trickier than it should be but it's mostly to avoid either
     // (a) some arbitrarily sized buffer which hopes to be big enough, or
