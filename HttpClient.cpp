@@ -261,7 +261,7 @@ void HttpClient::sendBasicAuth(const char* aUser, const char* aPassword) {
     iClient->println();
 }
 
-void HttpClient::receiveAndPrintResponse(int requestErrResult) {
+void HttpClient::receiveAndPrintResponse(int requestErrResult, Print& outData, Print& outDbg) {
     if (requestErrResult == 0) {
         requestErrResult = responseStatusCode();
         if (requestErrResult >= 0) {
@@ -274,20 +274,20 @@ void HttpClient::receiveAndPrintResponse(int requestErrResult) {
                 while (available()) {
                     char c = read();
                     // Print out this character
-                    Serial.print(c);
+                    outData.print(c);
                 }
-                Serial.println(F("HTTP done!\n"));
+                outDbg.println(F("HTTP done!\n"));
             } else {
-                Serial.print(F("Failed to skip response headers: "));
-                Serial.println(requestErrResult);
+                outDbg.print(F("Failed to skip response headers: "));
+                outDbg.println(requestErrResult);
             }
         } else {
-            Serial.print(F("Getting response failed: "));
-            Serial.println(requestErrResult);
+            outDbg.print(F("Getting response failed: "));
+            outDbg.println(requestErrResult);
         }
     } else {
-        Serial.print(F("Connect failed: "));
-        Serial.println(requestErrResult);
+        outDbg.print(F("Connect failed: "));
+        outDbg.println(requestErrResult);
     }
 }
 

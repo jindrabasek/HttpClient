@@ -426,7 +426,7 @@ public:
         iHttpResponseTimeout = timeout;
     }
 
-    void receiveAndPrintResponse(int requestErrResult);
+    void receiveAndPrintResponse(int requestErrResult, Print& outData, Print& outDbg);
 
 protected:
     /** Reset internal state data back to the "just initialised" state
