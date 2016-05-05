@@ -17,8 +17,13 @@
 #endif
 
 // Initialize constants
-const char* HttpClient::kUserAgent = "Arduino/2.2.0";
-const char* HttpClient::kContentLengthPrefix = HTTP_HEADER_CONTENT_LENGTH ": ";
+static const char kContentLengthPrefix[] PROGMEM  = HTTP_HEADER_CONTENT_LENGTH ": ";
+static const char kStatusPrefix[] PROGMEM = "HTTP/*.* ";
+
+const char HTTP_METHOD_GET[] PROGMEM = "GET";
+const char HTTP_METHOD_POST[] PROGMEM = "POST";
+const char HTTP_METHOD_PUT[] PROGMEM = "PUT";
+const char HTTP_METHOD_DELETE[] PROGMEM = "DELETE";
 
 #ifdef PROXY_ENABLED // currently disabled as introduces dependency on Dns.h in Ethernet
 HttpClient::HttpClient(Client& aClient, const char* aProxy, uint16_t aProxyPort)
@@ -61,7 +66,7 @@ void HttpClient::beginRequest() {
 }
 
 int HttpClient::startRequest(const char* aServerName, uint16_t aServerPort,
-                             const char* aURLPath, const char* aHttpMethod,
+                             const char* aURLPath, PGM_P aHttpMethod,
                              const char* aUserAgent) {
     tHttpState initialState = iState;
     if ((eIdle != iState) && (eRequestStarted != iState)) {
@@ -104,7 +109,7 @@ int HttpClient::startRequest(const char* aServerName, uint16_t aServerPort,
 
 int HttpClient::startRequest(const IPAddress& aServerAddress,
                              const char* aServerName, uint16_t aServerPort,
-                             const char* aURLPath, const char* aHttpMethod,
+                             const char* aURLPath, PGM_P aHttpMethod,
                              const char* aUserAgent) {
     tHttpState initialState = iState;
     if ((eIdle != iState) && (eRequestStarted != iState)) {
@@ -147,13 +152,13 @@ int HttpClient::startRequest(const IPAddress& aServerAddress,
 
 int HttpClient::sendInitialHeaders(const char* aServerName, IPAddress aServerIP,
                                    uint16_t aPort, const char* aURLPath,
-                                   const char* aHttpMethod,
+                                   PGM_P aHttpMethod,
                                    const char* aUserAgent) {
 #ifdef LOGGING
     Serial.println(F("Connected"));
 #endif
     // Send the HTTP command, i.e. "GET /somepath/ HTTP/1.0"
-    iClient->print(aHttpMethod);
+    iClient->print((const __FlashStringHelper *)aHttpMethod);
     iClient->print(" ");
 #ifdef PROXY_ENABLED
     if (iProxyPort)
@@ -191,33 +196,17 @@ int HttpClient::sendInitialHeaders(const char* aServerName, IPAddress aServerIP,
     }
     // And user-agent string
     if (aUserAgent) {
-        sendHeader(HTTP_HEADER_USER_AGENT, aUserAgent);
+        sendHeader(F(HTTP_HEADER_USER_AGENT), aUserAgent);
     } else {
-        sendHeader(HTTP_HEADER_USER_AGENT, kUserAgent);
+        sendHeader(F(HTTP_HEADER_USER_AGENT), F("Arduino/2.2.0"));
     }
     // We don't support persistent connections, so tell the server to
     // close this connection after we're done
-    sendHeader(HTTP_HEADER_CONNECTION, "close");
+    sendHeader(F(HTTP_HEADER_CONNECTION), F("close"));
 
     // Everything has gone well
     iState = eRequestStarted;
     return HTTP_SUCCESS;
-}
-
-void HttpClient::sendHeader(const char* aHeader) {
-    iClient->println(aHeader);
-}
-
-void HttpClient::sendHeader(const char* aHeaderName, const char* aHeaderValue) {
-    iClient->print(aHeaderName);
-    iClient->print(F(": "));
-    iClient->println(aHeaderValue);
-}
-
-void HttpClient::sendHeader(const char* aHeaderName, const int aHeaderValue) {
-    iClient->print(aHeaderName);
-    iClient->print(F(": "));
-    iClient->println(aHeaderValue);
 }
 
 void HttpClient::sendBasicAuth(const char* aUser, const char* aPassword) {
@@ -322,8 +311,7 @@ int HttpClient::responseStatusCode() {
         iState = eRequestSent;
 
         // Psuedo-regexp we're expecting before the status-code
-        const char* statusPrefix = "HTTP/*.* ";
-        const char* statusPtr = statusPrefix;
+        const char* statusPtr = kStatusPrefix;
         // Whilst we haven't timed out & haven't reached the end of the headers
         while ((c != '\n') && available()) {
             c = read();
@@ -331,10 +319,10 @@ int HttpClient::responseStatusCode() {
                 switch (iState) {
                     case eRequestSent:
                         // We haven't reached the status code yet
-                        if ((*statusPtr == '*') || (*statusPtr == c)) {
+                        if ((pgm_read_byte_near(statusPtr) == '*') || (pgm_read_byte_near(statusPtr) == c)) {
                             // This character matches, just move along
                             statusPtr++;
-                            if (*statusPtr == '\0') {
+                            if (pgm_read_byte_near(statusPtr) == '\0') {
                                 // We've reached the end of the prefix
                                 iState = eReadingStatusCode;
                             }
@@ -459,10 +447,10 @@ int HttpClient::readHeader() {
         case eStatusCodeRead:
             // We're at the start of a line, or somewhere in the middle of reading
             // the Content-Length prefix
-            if (*iContentLengthPtr == c) {
+            if (pgm_read_byte_near(iContentLengthPtr) == c) {
                 // This character matches, just move along
                 iContentLengthPtr++;
-                if (*iContentLengthPtr == '\0') {
+                if (pgm_read_byte_near(iContentLengthPtr) == '\0') {
                     // We've reached the end of the prefix
                     iState = eReadingContentLength;
                     // Just in case we get multiple Content-Length headers, this
@@ -522,7 +510,7 @@ int HttpClient::available() {
             }
             // We haven't got any data, so let's pause to allow some to
             // arrive
-            delay(kHttpWaitForDataDelay);
+            yield();
         }
     }
 

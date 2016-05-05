@@ -11,36 +11,38 @@
 #include <stddef.h>
 #include <stdint.h>
 
-static const int HTTP_SUCCESS = 0;
-// The end of the headers has been reached.  This consumes the '\n'
-// Could not connect to the server
-static const int HTTP_ERROR_CONNECTION_FAILED = -1;
-// This call was made when the HttpClient class wasn't expecting it
-// to be called.  Usually indicates your code is using the class
-// incorrectly
-static const int HTTP_ERROR_API = -2;
-// Spent too long waiting for a reply
-static const int HTTP_ERROR_TIMED_OUT = -3;
-// The response from the server is invalid, is it definitely an HTTP
-// server?
-static const int HTTP_ERROR_INVALID_RESPONSE = -4;
-
 // Define some of the common methods and headers here
 // That lets other code reuse them without having to declare another copy
 // of them, so saves code space and RAM
-#define HTTP_METHOD_GET    "GET"
-#define HTTP_METHOD_POST   "POST"
-#define HTTP_METHOD_PUT    "PUT"
-#define HTTP_METHOD_DELETE "DELETE"
+
 #define HTTP_HEADER_CONTENT_LENGTH "Content-Length"
 #define HTTP_HEADER_CONNECTION     "Connection"
 #define HTTP_HEADER_USER_AGENT     "User-Agent"
 
+
+extern const char HTTP_METHOD_GET[] PROGMEM;
+extern const char HTTP_METHOD_POST[] PROGMEM;
+extern const char HTTP_METHOD_PUT[] PROGMEM;
+extern const char HTTP_METHOD_DELETE[] PROGMEM;
+
 class HttpClient : public Client {
 public:
+    static const int HTTP_SUCCESS = 0;
+    // The end of the headers has been reached.  This consumes the '\n'
+    // Could not connect to the server
+    static const int HTTP_ERROR_CONNECTION_FAILED = -1;
+    // This call was made when the HttpClient class wasn't expecting it
+    // to be called.  Usually indicates your code is using the class
+    // incorrectly
+    static const int HTTP_ERROR_API = -2;
+    // Spent too long waiting for a reply
+    static const int HTTP_ERROR_TIMED_OUT = -3;
+    // The response from the server is invalid, is it definitely an HTTP
+    // server?
+    static const int HTTP_ERROR_INVALID_RESPONSE = -4;
+
     static const int kNoContentLengthHeader = -1;
     static const int kHttpPort = 80;
-    static const char* kUserAgent;
 
 // FIXME Write longer API request, using port and user-agent, example
 // FIXME Update tempToPachube example to calculate Content-Length correctly
@@ -265,7 +267,7 @@ public:
      @return 0 if successful, else error
      */
     int startRequest(const char* aServerName, uint16_t aServerPort,
-                     const char* aURLPath, const char* aHttpMethod,
+                     const char* aURLPath, PGM_P aHttpMethod,
                      const char* aUserAgent);
 
     /** Connect to the server and start to send the request.
@@ -281,14 +283,17 @@ public:
      */
     int startRequest(const IPAddress& aServerAddress, const char* aServerName,
                      uint16_t aServerPort, const char* aURLPath,
-                     const char* aHttpMethod, const char* aUserAgent);
+                     PGM_P aHttpMethod, const char* aUserAgent);
 
     /** Send an additional header line.  This can only be called in between the
      calls to startRequest and finishRequest.
      @param aHeader Header line to send, in its entirety (but without the
      trailing CRLF.  E.g. "Authorization: Basic YQDDCAIGES"
      */
-    void sendHeader(const char* aHeader);
+    template<typename T>
+    void sendHeader(T aHeader) {
+        iClient->println(aHeader);
+    }
 
     /** Send an additional header line.  This is an alternate form of
      sendHeader() which takes the header name and content as separate strings.
@@ -297,17 +302,12 @@ public:
      @param aHeaderName Type of header being sent
      @param aHeaderValue Value for that header
      */
-    void sendHeader(const char* aHeaderName, const char* aHeaderValue);
-
-    /** Send an additional header line.  This is an alternate form of
-     sendHeader() which takes the header name and content separately but where
-     the value is provided as an integer.
-     The call will add the ": " to separate the header, so for example, to
-     send a XXXXXX header call sendHeader("XXXXX", 123)
-     @param aHeaderName Type of header being sent
-     @param aHeaderValue Value for that header
-     */
-    void sendHeader(const char* aHeaderName, const int aHeaderValue);
+    template<typename T, typename U>
+    void sendHeader(T aHeaderName, U aHeaderValue) {
+        iClient->print(aHeaderName);
+        iClient->print(F(": "));
+        iClient->println(aHeaderValue);
+    }
 
     /** Send a basic authentication header.  This will encode the given username
      and password, and send them in suitable header line for doing Basic
@@ -447,20 +447,16 @@ protected:
      */
     int sendInitialHeaders(const char* aServerName, IPAddress aServerIP,
                            uint16_t aPort, const char* aURLPath,
-                           const char* aHttpMethod, const char* aUserAgent);
+                           PGM_P aHttpMethod, const char* aUserAgent);
 
     /* Let the server know that we've reached the end of the headers
      */
     void finishHeaders();
 
-    // Number of milliseconds that we wait each time there isn't any data
-    // available to be read (during status code and header processing)
-    static const int kHttpWaitForDataDelay = 3;
     // Number of milliseconds that we'll wait in total without receiveing any
     // data before returning HTTP_ERROR_TIMED_OUT (during status code and header
     // processing)
     static const int kHttpResponseTimeout = 5 * 200;
-    static const char* kContentLengthPrefix;
     typedef enum {
         eIdle,
         eRequestStarted,
