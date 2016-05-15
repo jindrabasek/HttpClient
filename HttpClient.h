@@ -25,6 +25,12 @@ extern const char HTTP_METHOD_POST[] PROGMEM;
 extern const char HTTP_METHOD_PUT[] PROGMEM;
 extern const char HTTP_METHOD_DELETE[] PROGMEM;
 
+// Do not define virtual destructor on purpose - class
+// and its children is not expected to need destructors,
+// it saves a lot of SRAM otherwise occupied by VTABLE
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+
 class HttpClient : public Client {
 public:
     static const int HTTP_SUCCESS = 0;
@@ -52,10 +58,6 @@ public:
 #else
     HttpClient(Client& aClient);
 #endif
-
-    virtual ~HttpClient() {
-    }
-
     /** Start a more complex request.
      Use this when you need to send additional headers in the request,
      but you will also need to call endRequest() when you are finished.
@@ -488,5 +490,7 @@ protected:
 #endif
     uint32_t iHttpResponseTimeout;
 };
+
+#pragma GCC diagnostic pop
 
 #endif
