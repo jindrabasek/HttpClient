@@ -49,6 +49,7 @@ public:
 
     static const int kNoContentLengthHeader = -1;
     static const int kHttpPort = 80;
+    static const int kHttpsPort = 443;
 
 // FIXME Write longer API request, using port and user-agent, example
 // FIXME Update tempToPachube example to calculate Content-Length correctly
